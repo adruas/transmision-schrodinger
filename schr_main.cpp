@@ -2,6 +2,8 @@
 de potencial, y obtiene mediante diversas pruebas el coeficiente de transmisión
 de dicha onda frente a dicha barrera.*/
 
+//Ejecutar con g++ schr_main.cpp deteccion.cpp generacion.cpp -o schr_main.exe
+
 //BIBLIOTECAS
 using namespace std;
 #include <iostream>
