@@ -1,0 +1,6 @@
+#Ancho N	Media del coef transmisión	error N	Desviación del coef de transmisión
+500	0.12743	0	0.0112092
+1000	0.15268	0	0.0100617
+1500	0.15822	0	0.011163
+2000	0.16014	0	0.0105176
+4000	0.16241	0	0.0118896
