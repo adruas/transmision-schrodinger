@@ -1,1 +1,1 @@
-Determinación del coeficiente K(lambda) con N=1000, n_D=300, n_ciclos=30
+Determinación del coeficiente K(lambda) con N=1000, n_D=600, n_ciclos=70
