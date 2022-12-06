@@ -1,0 +1,114 @@
+/*Programa que simula la interacción de una función de onda con una barrera
+de potencial, en un fichero se imprime la densidad de probabilidad y en otro
+se comprueba que la norma es constante en el tiempo*/
+
+//BIBLIOTECAS
+using namespace std;
+#include <iostream>
+#include <complex>
+#include <cmath>
+#include <fstream>
+//CONSTANTES
+const int N=1000;
+const double pi=3.14159265358979323846;
+
+//FUNCIÓN PRINCIPAL
+int main (void)
+{
+ //Declaración de variables
+ int n, j, l, p, pasos;
+ double lambda, k, norma;
+ complex<double> phi[N+1], alpha[N+1], beta[N], s, ji[N], V[N], numero_i, gamma[N];
+ ofstream sal_phi2, sal_norma, sal_potencial;
+
+ //Lectura de datos
+ cout << "Introduzca el número pasos del algoritmo: ";
+ cin >> pasos;
+ cout << "Introduzca el valor de lambda: ";
+ cin >> lambda;
+ cout << "Introduzca el numero de ciclos: ";
+ cin >> n;
+ //Defino la constante k
+ k=2.*pi*n/N;
+
+ //Cálculo del potencial reducido y lo escribo en fichero
+ sal_potencial.open("potencial.txt");
+ if(!sal_potencial.is_open()) cout <<"\n\nError al abrir el fichero";
+ sal_potencial <<"#Paso en coordenadas \t Potencial\n";
+ for(j=0; j<N; j++)
+ {
+  if(j>=2.*N/5 && j<=3.*N/5) V[j]=lambda*k*k;
+  else V[j]=0.0;
+  sal_potencial << j << "\t" << real(V[j]) << endl;
+ }
+
+ //Cálculo de alpha y gamma
+ numero_i=complex<double>(0.0,1.0);//Defino el numero i
+ s=1./(4*k*k); //Defino la constante s
+ alpha[N-1]=0; //Contorno
+ for(j=N-2;j>=0;j--)
+ {
+   gamma[j+1]=1.0/(-2.0+(2.0*numero_i/s)-V[j+1]+alpha[j+1]);
+   alpha[j]=-gamma[j+1];
+ }
+
+ //Abro los ficheros de escritura
+ sal_phi2.open("probabilidad.txt");
+ sal_norma.open("norma.txt");
+ if(!(sal_phi2.is_open()||sal_norma.is_open())) cout << "\n\nError al abrir el fichero\n\n";
+ sal_phi2 << "#Paso en coordenadas \t Densidad de probabilidad\n";
+ sal_norma <<"#Paso en el algoritmo \t Norma (probabilidad total)\n";
+
+
+ //Calculo las coordenadas de phi iniciales
+ phi[0]=0; phi[N]=0;
+ sal_phi2 << 0 << "\t" << norm(phi[0]) << endl;
+ for(j=1;j<N;j++) //Función de onda inicial
+ {
+  phi[j]=exp((numero_i*k*(1.0*j))-(8.0*(4.0*j-N)*(4.0*j-N)/(N*N))); //Gaussiana
+  sal_phi2 << j << "\t" << norm(phi[j]) << endl;
+ }
+
+ //Integral numérica (Regla del trapecio) para hallar la norma
+ //norma=(1.0/2.0)*(phi[0]+phi[N])+Σphi[i];
+ //Lo que no está en la suma siempre es cero por condicion de contorno... así que
+ norma=0.0;
+ for(p=1;p<N;p++)  norma+=norm(phi[p]);//Integro la densidad de prob
+ sal_phi2 << N << "\t" << norm(phi[N]) << endl;
+ sal_phi2 << endl << endl;
+ sal_norma << "0" << "\t" << norma << endl; //Primera norma
+
+ //IMPLEMENTO EL ALGORITMO
+ for(l=1; l<=pasos; l++)
+ {
+  //Calculo beta
+  beta[N-1]=0;
+  for(j=N-2;j>=0;j--)
+  {
+  beta[j]=gamma[j+1]*((4.0*numero_i*phi[j+1]/s)-beta[j+1]);
+  }
+
+  //Calculo ji
+  ji[N]=0;
+  ji[0]=0;
+  for(j=1; j<N; j++)
+  {
+  ji[j]=(alpha[j-1]*ji[j-1])+beta[j-1];
+  }
+
+  //Calculo LA FUNCIÓN DE ONDA
+  phi[N]=0; phi[0]=0;
+  for(j=1;j<N;j++) phi[j]=ji[j]-phi[j];
+
+  //FICHEROS
+  //Guardo en un fichero el módulo al cuadrado de phi (densidad de probabilidad)
+  for(j=0; j<=N; j++)  sal_phi2 << j << "\t" << norm(phi[j]) << endl;
+  //Integral numérica (Regla del trapecio) para hallar la norma
+  norma=0.0;
+  for(p=1;p<N;p++)  norma+=norm(phi[p]); //Integro la densidad de prob
+  sal_phi2 << endl << endl;
+  sal_norma << l << "\t" << norma << endl;
+ }//Fin algoritmo
+
+ return 0;
+}
